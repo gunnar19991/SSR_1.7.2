@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.event.world.BlockEvent;
-import ssr.SSRCore;
 import ssr.gameObjs.CageTile;
 import ssr.gameObjs.ObjHandler;
 import ssr.utils.TierHandling;
@@ -30,14 +29,23 @@ public class BreakCage
 				CageTile tile = (CageTile)world.getTileEntity(x, y, z);
 				if (tile != null && tile.tier != 0)
 				{
-					SSRCore.SoulLog.info("yay!");
 					int tier = tile.tier;
 					ItemStack stack = new ItemStack(ObjHandler.sShard);
 					stack.setTagCompound(new NBTTagCompound());
-					stack.stackTagCompound.setInteger("Tier", tier);
-					stack.stackTagCompound.setInteger("KillCount", TierHandling.getMin(tier));
-					stack.stackTagCompound.setString("EntityType", tile.entName);
-					stack.stackTagCompound.setString("EntityId", tile.entId);
+					NBTTagCompound nbt = stack.stackTagCompound;
+					nbt.setInteger("Tier", tier);
+					nbt.setInteger("KillCount", TierHandling.getMin(tier));
+					nbt.setString("EntityType", tile.entName);
+					nbt.setString("EntityId", tile.entId);
+					ItemStack heldItem = tile.heldItem;
+					if (heldItem != null)
+					{
+						nbt.setBoolean("HasItem", true);
+						NBTTagCompound nbt2 = new NBTTagCompound();
+						heldItem.writeToNBT(nbt2);
+						nbt.setTag("Item", nbt2);
+					}
+						
 					stack.setItemDamage(tier + 1);
 					world.spawnEntityInWorld(new EntityItem(world, x, y, z, stack));
 				}

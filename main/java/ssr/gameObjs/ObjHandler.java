@@ -1,6 +1,5 @@
 package ssr.gameObjs;
 
-import net.minecraft.tileentity.TileEntity;
 import ssr.SSRCore;
 import ssr.config.SoulConfig;
 import ssr.creativeTab.SoulTab;
@@ -22,7 +21,7 @@ public class ObjHandler
 		SSRCore.SoulLog.info("SSR: Registering game objects...");
 		GameRegistry.registerBlock(sCage, CageItem.class, sCage.getUnlocalizedName());
 		GameRegistry.registerItem(sShard, sShard.getUnlocalizedName());
-		TileEntity.addMapping(CageTile.class, "cage_tile");
+		GameRegistry.registerTileEntity(CageTile.class, "cage_tile");
 		SSRCore.SoulLog.info("SSR: Done!");
 	}
 }

@@ -10,9 +10,11 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
+import ssr.config.SoulConfig;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -45,13 +47,13 @@ public class SoulCage extends Block implements ITileEntityProvider
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block block)
 	{
 		CageTile tile = (CageTile) world.getTileEntity(x, y, z);
-		if (tile != null && tile.tier == 5)
+		if (tile != null && (tile.tier != 0 && SoulConfig.enableRS[tile.tier - 1]))
 		{
 			if (world.isBlockIndirectlyGettingPowered(x, y, z))
 				tile.isPowered = true;
 			else
 				tile.isPowered = false;
-		}			
+		}else if (tile != null)System.out.println(tile.tier);		
 	}
 	
 	@Override
@@ -68,14 +70,17 @@ public class SoulCage extends Block implements ITileEntityProvider
 					ItemStack stack = player.getHeldItem();
 					if (stack.hasTagCompound())
 					{
-						int tier = stack.stackTagCompound.getInteger("Tier");
-						String ent = stack.stackTagCompound.getString("EntityType");
-						String entId = stack.stackTagCompound.getString("EntityId");
+						NBTTagCompound nbt = stack.stackTagCompound;
+						int tier = nbt.getInteger("Tier");
+						String ent = nbt.getString("EntityType");
+						String entId = nbt.getString("EntityId");
 						if (tier > 0 && !ent.equals("empty") && !entId.equals("empty") && tile.tier == 0)
 						{
 							tile.entName = ent;
 							tile.entId = entId;
 							tile.tier = tier;
+							if (nbt.getBoolean("HasItem"))
+								tile.heldItem = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("Item"));
 							if (!player.capabilities.isCreativeMode)
 								stack.stackSize--;
 							world.setBlockMetadataWithNotify(x, y, z, 1, 2);

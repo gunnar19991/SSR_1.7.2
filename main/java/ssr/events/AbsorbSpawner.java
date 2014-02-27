@@ -1,5 +1,6 @@
 package ssr.events;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,6 +12,7 @@ import ssr.config.SoulConfig;
 import ssr.gameObjs.ObjHandler;
 import ssr.utils.EntityWhitelist;
 import ssr.utils.NameTranslation;
+import ssr.utils.TierHandling;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class AbsorbSpawner 
@@ -40,19 +42,29 @@ public class AbsorbSpawner
 							stack.setTagCompound(new NBTTagCompound());
 							stack.stackTagCompound.setString("EntityType", "empty");
 						}
+						NBTTagCompound nbt = stack.stackTagCompound;
+						String nbtName = nbt.getString("EntityType");
+						int nbtKills = nbt.getInteger("KillCount");
+						int tier = nbt.getInteger("Tier");
 						
-						String nbtName = stack.stackTagCompound.getString("EntityType");
-						int nbtKills = stack.stackTagCompound.getInteger("KillCount");
-						
-						if ((nbtName.equals("empty") || translate.equals(nbtName)) && (nbtKills != 1024 || nbtName.equals("empty")))
+						if ((nbtName.equals("empty") || translate.equals(nbtName)) && (nbtKills != TierHandling.getMax(5) || nbtName.equals("empty")))
 						{
 							int totalKills = nbtKills + 200;
-							totalKills = totalKills > 1024 ? 1024 : totalKills; 
-							stack.stackTagCompound.setInteger("KillCount", totalKills);
+							totalKills = totalKills > TierHandling.getMax(5) ? TierHandling.getMax(5) : totalKills; 
+							nbt.setInteger("KillCount", totalKills);
 							if (nbtName.equals("empty"))
 							{
-								stack.stackTagCompound.setString("EntityType", translate);
-								stack.stackTagCompound.setString("EntityId", entName);
+								nbt.setString("EntityType", translate);
+								nbt.setString("EntityId", entName);
+								EntityLiving entLiv = (EntityLiving)spawner.func_145881_a().func_98281_h();
+								ItemStack heldItem =  entLiv.getEquipmentInSlot(0);
+								if (heldItem != null && !nbt.getBoolean("HasItem"))
+								{
+									nbt.setBoolean("HasItem", true);
+									NBTTagCompound nbt2 = new NBTTagCompound();
+									heldItem.writeToNBT(nbt2);
+									nbt.setTag("Item", nbt2);
+								}
 							}
 							world.setBlockToAir(event.x, event.y, event.z);
 						}

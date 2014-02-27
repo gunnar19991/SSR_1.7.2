@@ -12,6 +12,7 @@ import ssr.gameObjs.ObjHandler;
 import ssr.utils.EntityWhitelist;
 import ssr.utils.InvUtils;
 import ssr.utils.NameTranslation;
+import ssr.utils.TierHandling;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class PlayerKill
@@ -45,15 +46,24 @@ public class PlayerKill
 						stack.stackTagCompound.setString("EntityId", EntityList.getEntityString(ent));
 					}
 					
-					if (stack.stackTagCompound.getString("EntityType").equals("empty"))
-					{
-						stack.stackTagCompound.setString("EntityType", entName);
-						stack.stackTagCompound.setString("EntityId", EntityList.getEntityString(ent));
-					}
+					NBTTagCompound nbt = stack.stackTagCompound;
 					
-					int kills = stack.stackTagCompound.getInteger("KillCount");
+					if (nbt.getString("EntityType").equals("empty"))
+					{
+						nbt.setString("EntityType", entName);
+						nbt.setString("EntityId", EntityList.getEntityString(ent));
+						ItemStack heldItem = ent.getEquipmentInSlot(0);
+						if ((!entName.equals("Zombie") || !entName.equals("Enderman")) && heldItem != null)
+						{
+							nbt.setBoolean("HasItem", true);
+							NBTTagCompound nbt2 = new NBTTagCompound();
+							heldItem.writeToNBT(nbt2);
+							nbt.setTag("Item", nbt2);
+						}
+					}
+					int kills = nbt.getInteger("KillCount");
 					if (kills < 1024)
-						stack.stackTagCompound.setInteger("KillCount", killBonus(player.getHeldItem(), kills));
+						nbt.setInteger("KillCount", killBonus(player.getHeldItem(), kills));
 				}
 			}
 		}
@@ -71,10 +81,9 @@ public class PlayerKill
 				return kills + 1;
 			else
 			{
-				result = kills + SSLevel;
-				if (result > 1024)
-					return 1024;
-				else return result;
+				result = kills + SSLevel + 1;
+				result = result > TierHandling.getMax(5) ? TierHandling.getMax(5) : result;
+				return result;
 			}
 		}
 	}

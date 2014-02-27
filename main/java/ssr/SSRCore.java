@@ -10,6 +10,7 @@ import ssr.config.SoulConfig;
 import ssr.events.SoulEvents;
 import ssr.gameObjs.ObjHandler;
 import ssr.utils.EntityWhitelist;
+import ssr.utils.TierHandling;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -27,7 +28,7 @@ public class SSRCore
 	
 	public static final String ID = "SSR";
 	public static final String Name = "Soul Shards: Reborn";
-	public static final String Version = "0.6a";
+	public static final String Version = "Alpha 0.7a";
 	
 	public static Logger SoulLog = FMLLog.getLogger();
 	
@@ -38,14 +39,15 @@ public class SSRCore
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event)
 	{
-		timeBegin = System.nanoTime();
+		timeBegin = System.currentTimeMillis();
 		configDir = event.getModConfigurationDirectory() + "/Soul Shards Reborn/";
 		SoulConfig.init(new File(configDir + "Main.cfg"));
+		TierHandling.init();
 		EntityWhitelist.init();
 		MobBlackList.init(new File(configDir + "Entity Blacklist.cfg"));
 		ObjHandler.init();
 		SoulEvents.init();
-		timeEnd = System.nanoTime();
+		timeEnd = System.currentTimeMillis();
 	}
 	
 	@EventHandler
@@ -57,6 +59,6 @@ public class SSRCore
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event)
 	{	
-		SoulLog.info("SSR: Mod Loaded successfully in a time of "+((timeEnd - timeBegin)/Math.pow(10, 6))+" milliseconds");
+		SoulLog.info("SSR: Mod Loaded successfully in "+(timeEnd - timeBegin)+" milliseconds");
 	}
 }

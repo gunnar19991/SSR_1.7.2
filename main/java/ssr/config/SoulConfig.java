@@ -10,13 +10,21 @@ public class SoulConfig
 	/**Not implemented for 1.7.2 version**/
 	public static boolean allowModMobs;
 	
+	public static boolean autoID;
 	public static boolean disallowMobs;
 	public static boolean canAbsorbSpawners;
+	public static int soulShardID;
+	public static int soulCageID;
 	public static int soulStealerID;
 	public static int soulStealerWeight;
 	public static int maxNumSpawns;
 	public static int coolDown[] = new int[5];
 	public static int numMobs[] = new int[5];
+	public static int killReq[] = new int[5];
+	public static boolean[] enableRS = new boolean[5];
+	public static boolean[] needPlayer = new boolean[5];
+	public static boolean[] checkLight = new boolean[5];
+	public static boolean[] otherWorlds = new boolean[5];
 	
 	public static void init(File configFile)
 	{
@@ -25,22 +33,51 @@ public class SoulConfig
 		try
 		{
 			config.load();
+			autoID = config.get("IDs", "Enable the mod's dynamic ID system", true).getBoolean(true);
 			disallowMobs = config.get("Misc", "Set soul shards to accept only peaceful mobs (will be ignored if set to allow non vanilla mobs)", false).getBoolean(false);
 			canAbsorbSpawners = config.get("Misc", "Allow levelling up shards by absorbing vanilla spawners", true).getBoolean(true);
 			maxNumSpawns = config.get("Misc", "The max amount of mobs spawned by Soul Cages that can be alive at once (setting this to 0 sets it to unlimited)", 80).getInt(80);
-			allowModMobs = config.get("Misc", "Allow non vanilla mobs (NOT YET IMPLEMENTED FOR 1.7.2)", false).getBoolean(false);
+			allowModMobs = config.get("Misc", "Allow non vanilla mobs", true).getBoolean(true);
+			soulShardID = config.get("IDs", "Soul Shard item ID (ignored if dynamic ID system is on)", 4097).getInt(4097);
+			soulCageID = config.get("IDs", "Soul Cage block ID (ignored if dynamic ID system is on)", 1000).getInt(1000);
 			soulStealerID = config.get("IDs", "Soul Stealer enchant ID", 85).getInt();
-			soulStealerWeight = config.get("Misc", "The weight (probability) of the Soul Stealer enchant", 5).getInt(5);			
+			soulStealerWeight = config.get("Misc", "The weight (probability) of the Soul Stealer enchant", 5).getInt(5);
+			
 			coolDown[0] = config.get("Tier 1 Settings", "Cool-down (in seconds)", 20).getInt(20);
 			numMobs[0] = config.get("Tier 1 Settings", "Number of mobs to spawn", 2).getInt(2);
+			enableRS[0] = config.get("Tier 1 Settings", "Responds to redstone signal", false).getBoolean(false);
+			needPlayer[0] = config.get("Tier 1 Settings", "Needs a player within 16 blocks", true).getBoolean(true);
+			checkLight[0] = config.get("Tier 1 Settings", "Check if light level is appropriate for the Mob", true).getBoolean(true);
+			otherWorlds[0] = config.get("Tier 1 Settings", "Check if the dimension is appropriate for the Mob", true).getBoolean(true);
+			killReq[0] = config.get("Tier 1 Settings", "Amount of kills required", 64).getInt(64);
 			coolDown[1] = config.get("Tier 2 Settings", "Cool-down (in seconds)", 10).getInt(10);
 			numMobs[1] = config.get("Tier 2 Settings", "Number of mobs to spawn", 4).getInt(4);
+			enableRS[1] = config.get("Tier 2 Settings", "Responds to redstone signal", false).getBoolean(false);
+			needPlayer[1] = config.get("Tier 2 Settings", "Needs a player within 16 blocks", true).getBoolean(true);
+			checkLight[1] = config.get("Tier 2 Settings", "Check if light level is appropriate for the Mob", true).getBoolean(true);
+			otherWorlds[1] = config.get("Tier 2 Settings", "Check if the dimension is appropriate for the Mob", true).getBoolean(true);
+			killReq[1] = config.get("Tier 2 Settings", "Amount of kills required (must be larger than Tier 1 requirement)", 128).getInt(128);
 			coolDown[2] = config.get("Tier 3 Settings", "Cool-down (in seconds)", 5).getInt(5);
 			numMobs[2] = config.get("Tier 3 Settings", "Number of mobs to spawn", 4).getInt(4);
+			enableRS[2] = config.get("Tier 3 Settings", "Responds to redstone signal", false).getBoolean(false);
+			needPlayer[2] = config.get("Tier 3 Settings", "Needs a player within 16 blocks", false).getBoolean(false);
+			checkLight[2] = config.get("Tier 3 Settings", "Check if light level is appropriate for the Mob", false).getBoolean(false);
+			otherWorlds[2] = config.get("Tier 3 Settings", "Check if the dimension is appropriate for the Mob", true).getBoolean(true);
+			killReq[2] = config.get("Tier 3 Settings", "Amount of kills required (must be larger than Tier 2 requirement)", 256).getInt(256);
 			coolDown[3] = config.get("Tier 4 Settings", "Cool-down (in seconds)", 5).getInt(5);
 			numMobs[3] = config.get("Tier 4 Settings", "Number of mobs to spawn", 4).getInt(4);
+			enableRS[3] = config.get("Tier 4 Settings", "Responds to redstone signal", false).getBoolean(false);
+			needPlayer[3] = config.get("Tier 4 Settings", "Needs a player within 16 blocks", false).getBoolean(false);
+			checkLight[3] = config.get("Tier 4 Settings", "Check if light level is appropriate for the Mob", true).getBoolean(true);
+			otherWorlds[3] = config.get("Tier 4 Settings", "Check if the dimension is appropriate for the Mob", false).getBoolean(false);
+			killReq[3] = config.get("Tier 4 Settings", "Amount of kills required (must be larger than Tier 3 requirement)", 512).getInt(512);
 			coolDown[4] = config.get("Tier 5 Settings", "Cool-down (in seconds)", 2).getInt(2);
 			numMobs[4] = config.get("Tier 5 Settings", "Number of mobs to spawn", 6).getInt(6);
+			enableRS[4] = config.get("Tier 5 Settings", "Responds to redstone signal", true).getBoolean(true);
+			needPlayer[4] = config.get("Tier 5 Settings", "Needs a player within 16 blocks", false).getBoolean(false);
+			checkLight[4] = config.get("Tier 5 Settings", "Check if light level is appropriate for the Mob", false).getBoolean(false);
+			otherWorlds[4] = config.get("Tier 5 Settings", "Check if the dimension is appropriate for the Mob", false).getBoolean(false);
+			killReq[4] = config.get("Tier 5 Settings", "Amount of kills required (must be larger than Tier 4 requirement)", 1024).getInt(1024);
 			
 			if (maxNumSpawns > 150)
 				maxNumSpawns = 80;
@@ -64,18 +101,17 @@ public class SoulConfig
 			if (soulStealerWeight > 10 || soulStealerWeight < 1)
 				soulStealerWeight = 5;
 			
-			SSRCore.SoulLog.info("SSR: Loaded main config file.");
+			SSRCore.SoulLog.info("Loaded Main configuration file.");
 		}
 		catch(Exception e)
 		{
-			SSRCore.SoulLog.fatal("Soul-Shards Reborn had a problem loading it's configuration files.");
+			SSRCore.SoulLog.warn("Soul-Shards Reborn had a problem loading it's configuration files.");
 			e.printStackTrace();
 		}
 		finally
 		{
 			if (config.hasChanged())
 				config.save();
-		}
-		
+		}		
 	}
 }

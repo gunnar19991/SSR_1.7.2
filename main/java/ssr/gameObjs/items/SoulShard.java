@@ -10,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import ssr.gameObjs.ObjHandler;
 import ssr.utils.TierHandling;
@@ -41,7 +42,14 @@ public class SoulShard extends Item
 			int damage = stack.getItemDamage();
 			if (!TierHandling.isInBounds(tier, kills))
 			{
-				tier = TierHandling.updateTier(kills);
+				if (kills > TierHandling.getMax(5))
+				{
+					tier = 5;
+					kills = TierHandling.getMax(5);
+					stack.stackTagCompound.setInteger("KillCount", kills);
+				}
+				else
+					tier = TierHandling.updateTier(kills);
 				damage = tier + 1;
 				stack.stackTagCompound.setInteger("Tier", tier);
 				stack.setItemDamage(damage);
@@ -90,9 +98,13 @@ public class SoulShard extends Item
 			int kills = stack.stackTagCompound.getInteger("KillCount");
 			int tier = stack.stackTagCompound.getInteger("Tier");
 			if (!ent.equals("empty"))
-				list.add("Bound to: "+ent);
-			list.add("Kills: "+kills);
-			list.add("Tier: "+tier);
+			{
+				if (ent.endsWith(".name"))
+					ent = StatCollector.translateToLocal(ent);
+				list.add("Bound to: "+ ent);
+			}
+			list.add("Kills: "+ kills);
+			list.add("Tier: "+ tier);
 		}
 		else list.add("Kill a creature to trap its soul.");
 	}
