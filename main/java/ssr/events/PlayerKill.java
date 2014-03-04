@@ -62,7 +62,7 @@ public class PlayerKill
 						}
 					}
 					int kills = nbt.getInteger("KillCount");
-					if (kills < 1024)
+					if (kills < TierHandling.getMax(5))
 						nbt.setInteger("KillCount", killBonus(player.getHeldItem(), kills));
 				}
 			}
@@ -77,14 +77,9 @@ public class PlayerKill
 		{
 			int result;
 			int SSLevel = EnchantmentHelper.getEnchantmentLevel(ObjHandler.sStealer.effectId, stack);
-			if (SSLevel == 0)
-				return kills + 1;
-			else
-			{
-				result = kills + SSLevel + 1;
-				result = result > TierHandling.getMax(5) ? TierHandling.getMax(5) : result;
-				return result;
-			}
+			result = kills + SSLevel + 1;
+			result = result > TierHandling.getMax(5) ? TierHandling.getMax(5) : result;
+			return result;
 		}
 	}
 }

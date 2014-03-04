@@ -35,7 +35,7 @@ public class AbsorbSpawner
 				{
 					String entName = spawner.func_145881_a().getEntityNameToSpawn(); //func_ is MobSpawnerBaseLogic
 					String translate = NameTranslation.entityName(entName);
-					if (EntityWhitelist.isEntityAccepted(translate))
+					if (EntityWhitelist.isEntityAccepted(translate) && !SoulConfig.easyVanillaAbsorb)
 					{
 						if (!stack.hasTagCompound())
 						{
@@ -66,6 +66,38 @@ public class AbsorbSpawner
 									nbt.setTag("Item", nbt2);
 								}
 							}
+							world.setBlockToAir(event.x, event.y, event.z);
+						}
+					}
+					else if (SoulConfig.easyVanillaAbsorb)
+					{
+						if (!stack.hasTagCompound())
+						{
+							stack.setTagCompound(new NBTTagCompound());
+							stack.stackTagCompound.setString("EntityType", "empty");
+						}
+						NBTTagCompound nbt = stack.stackTagCompound;
+						String nbtName = nbt.getString("EntityType");
+						int nbtKills = nbt.getInteger("KillCount");
+						if (nbtName.equals("empty"))
+						{
+							nbt.setString("EntityType", translate);
+							nbt.setString("EntityId", entName);
+							EntityLiving entLiv = (EntityLiving)spawner.func_145881_a().func_98281_h();
+							ItemStack heldItem =  entLiv.getEquipmentInSlot(0);
+							if (heldItem != null && !nbt.getBoolean("HasItem"))
+							{
+								nbt.setBoolean("HasItem", true);
+								NBTTagCompound nbt2 = new NBTTagCompound();
+								heldItem.writeToNBT(nbt2);
+								nbt.setTag("Item", nbt2);
+							}
+						}
+						if (nbtKills < TierHandling.getMax(5))
+						{
+							nbtKills += SoulConfig.vanillaBonus;
+							nbtKills = nbtKills > TierHandling.getMax(5) ? TierHandling.getMax(5) : nbtKills;
+							nbt.setInteger("KillCount", nbtKills);
 							world.setBlockToAir(event.x, event.y, event.z);
 						}
 					}
