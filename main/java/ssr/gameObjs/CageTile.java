@@ -86,28 +86,33 @@ public class CageTile extends TileEntity
 				else
 					tempEnt = (EntityLiving) EntityList.createEntityByName(entId, (World)null);
 				
-				if (tempEnt != null && (!hasReachedSpawnLimit(tempEnt) || SoulConfig.maxNumSpawns == 0))
+				if (tempEnt != null)
 				{
 					if (SoulConfig.enableRS[tier - 1])
 						flag = isPowered;
 					else flag = true;
+				
+					if (flag)
+					{
+						flag = (!hasReachedSpawnLimit(tempEnt) || SoulConfig.maxNumSpawns == 0);
 					
-					if (SoulConfig.needPlayer[tier - 1] && flag)
-						flag = isPlayerClose(xCoord, yCoord, zCoord);
+						if (SoulConfig.needPlayer[tier - 1] && flag)
+							flag = isPlayerClose(xCoord, yCoord, zCoord);
+					
+						if (SoulConfig.checkLight[tier - 1] && flag)
+							flag = canSpawnInLight(tempEnt, xCoord, yCoord, zCoord);
 
-					if (SoulConfig.checkLight[tier - 1] && flag)
-						flag = canSpawnInLight(tempEnt, xCoord, yCoord, zCoord);
-					
-					if (SoulConfig.otherWorlds[tier - 1] && flag)
-						flag = canSpawnInWorld(tempEnt);
-				}	
+						if (SoulConfig.otherWorlds[tier - 1] && flag)
+							flag = canSpawnInWorld(tempEnt);
+					}
 				
-				if (flag && metadata == 1)
-					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 2);
-				else if (!flag && metadata == 2)
-					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-				
-				tempEnt = null;
+					if (flag && metadata == 1)
+						worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 2);
+					else if (!flag && metadata == 2)
+						worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
+
+					tempEnt = null; //destroy the object
+				}
 			}
 			
 			timer += 1;
@@ -229,7 +234,7 @@ public class CageTile extends TileEntity
 			if (entity.getEntityData().getBoolean("fromSSR"))
 				mobCount += 1;
 		}
-		if (mobCount <= 80)
+		if (mobCount <= SoulConfig.maxNumSpawns)
 			return false;
 		else return true;	
 	}
@@ -244,7 +249,6 @@ public class CageTile extends TileEntity
 				counter += 1;
 				if (counter >= 5)
 				{
-					System.out.println("Nope.");
 					ents[i].setDead();
 					break;
 				}

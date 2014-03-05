@@ -28,7 +28,7 @@ public class SSRCore
 	
 	public static final String ID = "SSR";
 	public static final String Name = "Soul Shards: Reborn";
-	public static final String Version = "Alpha 0.7b";
+	public static final String Version = "Alpha 0.7c";
 	
 	public static Logger SoulLog = FMLLog.getLogger();
 	
