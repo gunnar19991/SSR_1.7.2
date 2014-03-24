@@ -38,7 +38,7 @@ public class InvUtils
 			{
 				int kills = stack.stackTagCompound.getInteger("KillCount");
 				String name = stack.stackTagCompound.getString("EntityType");
-				if ((kills < 1024 || name.equals("empty")) && (name.equals(entName) || name.equals("empty")))
+				if ((kills < TierHandling.getMax(5) || name.equals("empty")) && (name.equals(entName) || name.equals("empty")))
 					result = true;
 			}
 		}

@@ -1,5 +1,7 @@
 package ssr.gameObjs;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import ssr.SSRCore;
 import ssr.config.SoulConfig;
 import ssr.creativeTab.SoulTab;
@@ -22,6 +24,7 @@ public class ObjHandler
 		GameRegistry.registerBlock(sCage, CageItem.class, sCage.getUnlocalizedName());
 		GameRegistry.registerItem(sShard, sShard.getUnlocalizedName());
 		GameRegistry.registerTileEntity(CageTile.class, "cage_tile");
+		GameRegistry.addShapedRecipe(new ItemStack(sCage, 1, 0), "iii", "i i", "iii", 'i', Blocks.iron_bars);
 		SSRCore.SoulLog.info("SSR: Done!");
 	}
 }

@@ -48,8 +48,8 @@ public class SoulShard extends Item
 					kills = TierHandling.getMax(5);
 					stack.stackTagCompound.setInteger("KillCount", kills);
 				}
-				else
-					tier = TierHandling.updateTier(kills);
+				
+				tier = TierHandling.updateTier(kills);
 				damage = tier + 1;
 				stack.stackTagCompound.setInteger("Tier", tier);
 				stack.setItemDamage(damage);

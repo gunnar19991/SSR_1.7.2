@@ -9,6 +9,7 @@ import ssr.config.MobBlackList;
 import ssr.config.SoulConfig;
 import ssr.events.SoulEvents;
 import ssr.gameObjs.ObjHandler;
+import ssr.utils.CommandKillMobs;
 import ssr.utils.EntityWhitelist;
 import ssr.utils.TierHandling;
 import cpw.mods.fml.common.FMLLog;
@@ -18,6 +19,7 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 @Mod(modid = SSRCore.ID, name = SSRCore.Name, version = SSRCore.Version)
 
@@ -28,7 +30,7 @@ public class SSRCore
 	
 	public static final String ID = "SSR";
 	public static final String Name = "Soul Shards: Reborn";
-	public static final String Version = "Alpha 0.7c";
+	public static final String Version = "Alpha 0.8c";
 	
 	public static Logger SoulLog = FMLLog.getLogger();
 	
@@ -60,5 +62,11 @@ public class SSRCore
 	public void postInit(FMLPostInitializationEvent event)
 	{	
 		SoulLog.info("SSR: Mod Loaded successfully in "+(timeEnd - timeBegin)+" milliseconds");
+	}
+	
+	@EventHandler
+	public void loadWorld(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new CommandKillMobs());
 	}
 }

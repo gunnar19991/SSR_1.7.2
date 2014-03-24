@@ -14,6 +14,7 @@ public class SoulConfig
 	public static boolean disallowMobs;
 	public static boolean canAbsorbSpawners;
 	public static boolean easyVanillaAbsorb;
+	public static boolean requireOwnerOnline;
 	public static int vanillaBonus;
 	public static int soulShardID;
 	public static int soulCageID;
@@ -39,6 +40,7 @@ public class SoulConfig
 			disallowMobs = config.get("Misc", "Set soul shards to accept only peaceful mobs (will be ignored if set to allow non vanilla mobs)", false).getBoolean(false);
 			canAbsorbSpawners = config.get("Misc", "Allow levelling up shards by absorbing vanilla spawners", true).getBoolean(true);
 			easyVanillaAbsorb = config.get("Misc", "Allow absorbing of vanilla spawners even if the entity in the spawner is not equal to the entity bound to the shard", false).getBoolean(false); 
+			requireOwnerOnline = config.get("Misc", "Require the owner of the Soul Cage to be online for it to spawn mobs", false).getBoolean(false);
 			vanillaBonus = config.get("Misc", "Bonus amount from absorbing a vanilla spawner", 200).getInt(200);
 			maxNumSpawns = config.get("Misc", "The max amount of mobs spawned by Soul Cages that can be alive at once (setting this to 0 sets it to unlimited)", 80).getInt(80);
 			allowModMobs = config.get("Misc", "Allow non vanilla mobs", true).getBoolean(true);

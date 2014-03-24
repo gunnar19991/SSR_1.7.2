@@ -1,12 +1,14 @@
 package ssr.gameObjs;
 
 import java.util.List;
+import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -18,115 +20,134 @@ import ssr.config.SoulConfig;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-
 public class SoulCage extends Block implements ITileEntityProvider
 {
-	@SideOnly(Side.CLIENT)
-	private IIcon[] icons;
-	
-	protected SoulCage() 
-	{
-		super(Material.rock);
-		this.setBlockName("soul_cage");
-		this.setCreativeTab(ObjHandler.sTab);
-		this.blockHardness = 3.0F;
-		this.blockResistance = 3.0F;
-	}
-	
-	@Override
-	public void onBlockAdded(World world, int x, int y, int z)
-	{
-		if (!world.isRemote)
-		{
-			if (world.getBlockMetadata(x, y, z) != 0)
-				world.setBlockMetadataWithNotify(x, y, z, 0, 2);
-		}
-	}
-	
-	@Override
-	public void onNeighborBlockChange(World world, int x, int y, int z, Block block)
-	{
-		CageTile tile = (CageTile) world.getTileEntity(x, y, z);
-		if (tile != null && (tile.tier != 0 && SoulConfig.enableRS[tile.tier - 1]))
-		{
-			if (world.isBlockIndirectlyGettingPowered(x, y, z))
-				tile.isPowered = true;
-			else
-				tile.isPowered = false;
-		}else if (tile != null)System.out.println(tile.tier);		
-	}
-	
-	@Override
-	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9)
-	{
-		if (!world.isRemote)
-		{
-			if (player.getHeldItem() != null)
-			{
-				CageTile tile = (CageTile) world.getTileEntity(x, y, z);
+    @SideOnly(Side.CLIENT)
+    public IIcon[] icons;
 
-				if (player.getHeldItem().getItem() == ObjHandler.sShard && tile != null)
-				{
-					ItemStack stack = player.getHeldItem();
-					if (stack.hasTagCompound())
-					{
-						NBTTagCompound nbt = stack.stackTagCompound;
-						int tier = nbt.getInteger("Tier");
-						String ent = nbt.getString("EntityType");
-						String entId = nbt.getString("EntityId");
-						if (tier > 0 && !ent.equals("empty") && !entId.equals("empty") && tile.tier == 0)
-						{
-							tile.entName = ent;
-							tile.entId = entId;
-							tile.tier = tier;
-							if (nbt.getBoolean("HasItem"))
-								tile.heldItem = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("Item"));
-							if (!player.capabilities.isCreativeMode)
-								stack.stackSize--;
-							world.setBlockMetadataWithNotify(x, y, z, 1, 2);
-						}
-					}
-				}
-			}
-		}
+    public SoulCage()
+    {
+        super(Material.iron);
+        this.setCreativeTab(ObjHandler.sTab);
+        this.blockHardness = 3.0F;
+        this.blockResistance = 3.0F;
+    }
+
+    @Override
+    public void onBlockAdded(World world, int x, int y, int z)
+    {
+        if (!world.isRemote && world.getBlockMetadata(x, y, z) != 0)
+        	world.setBlockMetadataWithNotify(x, y, z, 0, 2);
+    }
+    
+    @Override
+    public void onBlockPreDestroy(World world, int x, int y, int z, int meta) 
+    {
+    	if (world.isRemote || meta == 0) return;
+    	CageTile tile = (CageTile) world.getTileEntity(x, y, z);
+    	if (tile == null || tile.inventory == null || tile.hasFailed) return;
+    	world.spawnEntityInWorld(new EntityItem(world, x, y, z, tile.decrStackSize(0, 1)));
+    }
+
+    @Override
+    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9)
+    {
+    	if (world.isRemote) return false;
+        
+    	CageTile tile = (CageTile) world.getTileEntity(x, y, z);
+        
+    	if (tile == null) return false;
+        
+    	if (player.getHeldItem() != null && player.getHeldItem().getItem() == ObjHandler.sShard)
+        {
+            if (tile.inventory != null) return false;
+            ItemStack stack = player.getHeldItem();
+            if (stack.hasTagCompound())
+            {
+            	NBTTagCompound nbt = stack.stackTagCompound;
+                int tier = nbt.getInteger("Tier");
+                String entName = nbt.getString("EntityType");
+                if (tier == 0 || entName.isEmpty() || entName.equals("empty")) return false;
+                tile.setInventorySlotContents(0, stack);
+                if (SoulConfig.requireOwnerOnline)
+                    tile.owner = player.getCommandSenderName();
+                if (!player.capabilities.isCreativeMode)
+                	stack.stackSize--;
+            }
+        }
+
+        if (player.isSneaking() && player.getHeldItem() == null)
+        {
+        	if (tile.inventory == null) return false;
+            world.spawnEntityInWorld(new EntityItem(world, x, y, z, tile.decrStackSize(0, 1)));
+        }
 		return false;
-	}
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void getSubBlocks(Item item, CreativeTabs cTab, List list)
-	{
-		for (int i = 0; i < 3; i++)
-			list.add(new ItemStack(item, 1, i));
-	}
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerBlockIcons(IIconRegister iconRegister)
-	{
-		String[] names = {"soulCage", "cageUnlit", "cageLit"};
-		icons = new IIcon[names.length];
-		for (int i = 0; i < names.length; i++)
-			icons[i] = iconRegister.registerIcon("ssr:"+names[i]);
-	}
-	  
-	@Override
-	@SideOnly(Side.CLIENT)
-	public IIcon getIcon(int side, int meta)
-	{
-		return icons[meta];
-	} 
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-	public boolean isOpaqueCube()
+    }
+
+    @Override
+    public void onNeighborBlockChange(World world, int x, int y, int z, Block block)
+    {
+        if (!world.isRemote)
+        {
+            CageTile tile = (CageTile) world.getTileEntity(x, y, z);
+
+            if (tile != null && (tile.tier != 0 && SoulConfig.enableRS[tile.tier - 1]))
+                tile.isPowered = world.isBlockIndirectlyGettingPowered(x, y, z);
+        }
+    }
+
+    @Override
+    public void dropXpOnBlockBreak(World par1World, int par2, int par3, int par4, int par5)
+    {
+    	
+    }
+
+    @Override
+    public TileEntity createNewTileEntity(World var1, int var2)
+    {
+        return new CageTile();
+    }
+
+    @Override
+    public int quantityDropped(Random par1Random)
+    {
+        return 1;
+    }
+
+    @Override
+    public int damageDropped(int par1)
+    {
+        return 0;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void getSubBlocks(Item item, CreativeTabs par2CreativeTabs, List par3List)
+    {
+        for (int i = 0; i < 3; i++)
+            par3List.add(new ItemStack(item, 1, i));
+    }
+
+    @Override
+    public IIcon getIcon(int side, int meta)
+    {
+        return icons[meta];
+    }
+
+    @Override
+    public boolean isOpaqueCube()
     {
         return false;
     }
 
-	@Override
-	public TileEntity createNewTileEntity(World var1, int var2) 
-	{
-		return new CageTile();
-	}
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerBlockIcons(IIconRegister iconRegister)
+    {
+        String[] textureNames = {"soulCage", "cageUnlit", "cageLit"};
+        icons = new IIcon[textureNames.length];
+
+        for (int i = 0; i < this.icons.length; i++)
+            icons[i] = iconRegister.registerIcon(String.format("%s:%s", new Object[] {"ssr", textureNames[i]}));
+    }
 }

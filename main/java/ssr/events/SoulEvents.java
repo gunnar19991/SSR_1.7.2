@@ -8,7 +8,6 @@ public class SoulEvents
 	{
 		MinecraftForge.EVENT_BUS.register(new PlayerKill());
 		MinecraftForge.EVENT_BUS.register(new AbsorbSpawner());
-		MinecraftForge.EVENT_BUS.register(new BreakCage());
 		MinecraftForge.EVENT_BUS.register(new CreateShard());
 	}
 }
